@@ -41,6 +41,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   pdfx: ^2.9.2
   image_picker: ^1.1.2
+  http_methods: ^1.1.1
 
 
 dev_dependencies:

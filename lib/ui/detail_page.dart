@@ -15,10 +15,7 @@ class DetailPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Text(
-          details,
-          style: const TextStyle(fontSize: 16, height: 1.5),
-        ),
+        child: Text(details, style: const TextStyle(fontSize: 16, height: 1.5)),
       ),
     );
   }

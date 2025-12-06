@@ -53,7 +53,7 @@ class _PostCardState extends State<PostCard> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
+           
             color: Colors.black.withOpacity(0.1),
             blurRadius: 6,
             offset: const Offset(0, 4),

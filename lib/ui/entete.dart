@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:on_mec/ui/notifications_view.dart';
 import 'package:on_mec/ui/profil_view.dart';
-import 'package:on_mec/models/user_model.dart'; 
 
 // Widget pour les icônes avec dégradé
 class GradientIcon extends StatelessWidget {
@@ -36,35 +35,18 @@ class EntetePersonalise extends StatelessWidget implements PreferredSizeWidget {
   final LinearGradient mecGradient = const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFFFF7F00),
-      Color(0xFF1556B5),
-    ],
+    colors: [Color(0xFFFF7F00), Color(0xFF1556B5)],
   );
 
   @override
   Widget build(BuildContext context) {
-    
-    // TEMP : utilisateur connecté (à remplacer plus tard par API / shared prefs)
-    final UserRegisterModel currentUser = UserRegisterModel(
-      fullname: "Mohamed Lamine",
-      email: "lamine@example.com",
-      phone: "+225070000000",
-      password: '1234',
-
-    );
-
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 1,
       centerTitle: false,
       leading: Padding(
         padding: const EdgeInsets.only(left: 16.0, top: 8, bottom: 8),
-        child: Image.asset(
-          'assets/logo_MEC_1.png',
-          height: 25,
-          width: 25,
-        ),
+        child: Image.asset('assets/logo_MEC_1.png', height: 25, width: 25),
       ),
       actions: [
         // Bouton Profil (avec passage de user)
@@ -78,14 +60,13 @@ class EntetePersonalise extends StatelessWidget implements PreferredSizeWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    ProfilView(user: currentUser), //  PASSAGE OK !
+                builder: (context) => ProfilView(), //  PASSAGE OK !
               ),
             );
           },
         ),
 
-        // 🔥 Notifications
+        // Notifications
         Transform.rotate(
           angle: -30 * math.pi / 180,
           child: IconButton(
@@ -97,7 +78,9 @@ class EntetePersonalise extends StatelessWidget implements PreferredSizeWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NotificationView()),
+                MaterialPageRoute(
+                  builder: (context) => const NotificationView(),
+                ),
               );
             },
           ),

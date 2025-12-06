@@ -11,8 +11,6 @@ class AjouterView extends StatefulWidget {
 class _AjouterViewState extends State<AjouterView> {
   @override
   Widget build(BuildContext context) {
-     return Scaffold(
-      appBar: EntetePersonalise(),
-    );
+    return Scaffold(appBar: EntetePersonalise());
   }
 }

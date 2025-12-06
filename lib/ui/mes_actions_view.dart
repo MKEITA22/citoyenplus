@@ -1,15 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:on_mec/models/post_model.dart';
+import 'package:on_mec/ui/accueil_view.dart';
 
 class MesActionsView extends StatelessWidget {
-  final List<PostModel> posts; // ⚡ Liste des posts passée depuis l’accueil
+  final List<PostModel> posts;
 
   const MesActionsView({super.key, required this.posts});
 
   @override
   Widget build(BuildContext context) {
-    // 🔥 Récupérer uniquement les signalements + tri du plus récent
     final List<PostModel> mesSignalements =
         posts.where((p) => p.type == "signalement").toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -27,7 +26,7 @@ class MesActionsView extends StatelessWidget {
       body: mesSignalements.isEmpty
           ? Center(
               child: Text(
-                "Aucune action signalée pour le moment 👀",
+                "Aucune action signalée pour le moment",
                 style: TextStyle(color: Colors.grey[600], fontSize: 16),
               ),
             )
@@ -37,15 +36,17 @@ class MesActionsView extends StatelessWidget {
               itemBuilder: (context, index) {
                 final post = mesSignalements[index];
 
-                final tagsList =
-                    post.tags != null && post.tags!.isNotEmpty
-                        ? post.tags!.split(",")
-                        : [];
+                final List<dynamic> tagsList;
+                if (post.tags.isNotEmpty) {
+                  tagsList = post.tags.split(",");
+                } else {
+                  tagsList = [];
+                }
                 final themeTag = tagsList.length >= 2
                     ? tagsList[1].trim()
                     : "Incivisme";
 
-                return _actionItem(
+                return actionItem(
                   image: post.imagePath,
                   theme: themeTag,
                   description: post.description.isNotEmpty
@@ -60,10 +61,9 @@ class MesActionsView extends StatelessWidget {
     );
   }
 
-  // --------------------------------------------------
-  // 🔥 Carte d’une action signalée
-  // --------------------------------------------------
-  Widget _actionItem({
+  // Carte d’une action signalée
+
+  Widget actionItem({
     required String image,
     required String theme,
     required String description,
@@ -89,7 +89,6 @@ class MesActionsView extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 3),

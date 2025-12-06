@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:on_mec/ui/signup_test.dart';
-
-
+import 'package:on_mec/ui/splash_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,7 +8,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -36,7 +33,10 @@ class MyApp extends StatelessWidget {
         textTheme: const TextTheme(
           bodyLarge: TextStyle(fontFamily: 'Georgia', fontSize: 16),
           bodyMedium: TextStyle(fontFamily: 'Georgia', fontSize: 14),
-          titleLarge: TextStyle(fontFamily: 'Metropolis', fontWeight: FontWeight.bold),
+          titleLarge: TextStyle(
+            fontFamily: 'Metropolis',
+            fontWeight: FontWeight.bold,
+          ),
           labelLarge: TextStyle(fontFamily: 'Metropolis'),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
@@ -52,8 +52,9 @@ class MyApp extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(12)),
             ),
           ),
-        ),),
-      home: SignupTestScreen(),
+        ),
+      ),
+      home: SplashScreen(),
     );
   }
 }

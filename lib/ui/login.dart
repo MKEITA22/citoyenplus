@@ -1,94 +1,19 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:on_mec/services/api_service.dart';
 import 'package:on_mec/ui/accueil.dart';
 import 'package:on_mec/ui/signup.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<LoginView> createState() => LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
-  final _formKey = GlobalKey<FormState>();
-
-  final TextEditingController emailCtrl = TextEditingController();
-  final TextEditingController passwordCtrl = TextEditingController();
-
-  bool isLoading = false;
+class LoginViewState extends State<LoginView> {
   bool obscure = true;
 
-  //  LOGIN API
-
-  Future<void> loginUser() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => isLoading = true);
-
-    final url = Uri.parse("https://api.mec-ci.org/api/v1/auth/login");
-    final Map<String, dynamic> data = {
-      "email": emailCtrl.text.trim(),
-      "password": passwordCtrl.text.trim(),
-    };
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          "accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode(data),
-      );
-
-      setState(() => isLoading = false);
-
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-
-        // Sauvegarder le token (si API renvoie un token)
-        if (body['token'] != null) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', body['token']);
-        }
-
-        ScaffoldMessenger.of(
-          // ignore: use_build_context_synchronously
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Connexion réussie")));
-
-        Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute(builder: (_) => const Home()),
-        );
-      } else {
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Échec de la connexion. Vérifie ton email ou mot de passe.",
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() => isLoading = false);
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erreur réseau. Vérifie ta connexion ❗")),
-      );
-    }
-  }
-
-  // Champ input réutilisable
-
-  Widget _inputField({
-    required TextEditingController controller,
+  // Widget inputField réutilisable
+  Widget inputField({
     required String label,
     required IconData icon,
     TextInputType? keyboard,
@@ -102,7 +27,6 @@ class _LoginViewState extends State<LoginView> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.05),
             blurRadius: 6,
             offset: const Offset(0, 3),
@@ -110,7 +34,6 @@ class _LoginViewState extends State<LoginView> {
         ],
       ),
       child: TextFormField(
-        controller: controller,
         keyboardType: keyboard,
         validator: validator,
         obscureText: obscureText,
@@ -139,13 +62,12 @@ class _LoginViewState extends State<LoginView> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
-          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 30),
               const Text(
-                "Heureux de te revoir 👋",
+                "Heureux de te revoir ",
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
@@ -155,9 +77,8 @@ class _LoginViewState extends State<LoginView> {
               ),
               const SizedBox(height: 35),
 
-              // Champ email
-              _inputField(
-                controller: emailCtrl,
+              // Email
+              inputField(
                 label: "Email",
                 icon: Icons.email_outlined,
                 keyboard: TextInputType.emailAddress,
@@ -165,7 +86,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               const SizedBox(height: 20),
 
-              // Champ mot de passe
+              // Mot de passe
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -176,7 +97,6 @@ class _LoginViewState extends State<LoginView> {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      // ignore: deprecated_member_use
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
@@ -184,7 +104,6 @@ class _LoginViewState extends State<LoginView> {
                   ],
                 ),
                 child: TextFormField(
-                  controller: passwordCtrl,
                   obscureText: obscure,
                   validator: (v) => v!.length < 6 ? "Min. 6 caractères" : null,
                   decoration: InputDecoration(
@@ -199,9 +118,7 @@ class _LoginViewState extends State<LoginView> {
                         obscure ? Icons.visibility_off : Icons.visibility,
                         color: Colors.grey,
                       ),
-                      onPressed: () {
-                        setState(() => obscure = !obscure);
-                      },
+                      onPressed: () => setState(() => obscure = !obscure),
                     ),
                   ),
                 ),
@@ -224,29 +141,16 @@ class _LoginViewState extends State<LoginView> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    bool success = await ApiService.login(
-                      emailCtrl.text,
-                      passwordCtrl.text,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Home()),
                     );
-                    if (success) {
-                      final data = await ApiService.getProtectedData();
-                      if (data != null) {
-                        // 🔹 Affiche les infos utilisateurs
-                        print(data);
-                      }
-                    } else {
-                      // ignore: use_build_context_synchronously
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Email ou mot de passe invalide"),
-                        ),
-                      );
-                    }
                   },
                   child: Text("Se connecter"),
                 ),
               ),
+
               const SizedBox(height: 25),
 
               Row(

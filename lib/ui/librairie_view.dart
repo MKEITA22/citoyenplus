@@ -46,20 +46,20 @@ class _LibrairieViewState extends State<LibrairieView> {
   ];
 
   late List<Map<String, String>> filteredDocuments;
-  final TextEditingController _searchCtrl = TextEditingController();
+  final TextEditingController searchCtrl = TextEditingController();
 
-  bool showBibliotheque = true; // ✅ Toggle Bibliothèque / Informations
+  bool showBibliotheque = true; // Toggle Bibliothèque / Informations
 
   @override
   void initState() {
     super.initState();
     filteredDocuments = List<Map<String, String>>.from(documents);
-    _searchCtrl.addListener(() => filterDocuments(_searchCtrl.text));
+    searchCtrl.addListener(() => filterDocuments(searchCtrl.text));
   }
 
   @override
   void dispose() {
-    _searchCtrl.dispose();
+    searchCtrl.dispose();
     super.dispose();
   }
 
@@ -87,7 +87,7 @@ class _LibrairieViewState extends State<LibrairieView> {
           children: [
             const SizedBox(height: 20),
 
-            // 🔹 Barre de recherche
+            // Barre de recherche
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
@@ -95,7 +95,6 @@ class _LibrairieViewState extends State<LibrairieView> {
                 borderRadius: BorderRadius.circular(45),
                 boxShadow: [
                   BoxShadow(
-                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 5,
                     offset: const Offset(0, 2),
@@ -108,18 +107,18 @@ class _LibrairieViewState extends State<LibrairieView> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
-                      controller: _searchCtrl,
+                      controller: searchCtrl,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: "Rechercher un document...",
                       ),
                     ),
                   ),
-                  if (_searchCtrl.text.isNotEmpty)
+                  if (searchCtrl.text.isNotEmpty)
                     IconButton(
                       icon: const Icon(Icons.clear),
                       onPressed: () {
-                        _searchCtrl.clear();
+                        searchCtrl.clear();
                         filterDocuments('');
                       },
                     ),
@@ -129,7 +128,7 @@ class _LibrairieViewState extends State<LibrairieView> {
 
             const SizedBox(height: 12),
 
-            // 🔹 Toggle Bibliothèque / Informations avec glow
+            // Toggle Bibliothèque
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey[300],
@@ -161,14 +160,12 @@ class _LibrairieViewState extends State<LibrairieView> {
                           boxShadow: showBibliotheque
                               ? [
                                   BoxShadow(
-                                    // ignore: deprecated_member_use
                                     color: Colors.orange.withOpacity(0.4),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 3),
                                   ),
                                   BoxShadow(
-                                    // ignore: deprecated_member_use
                                     color: Colors.blue.withOpacity(0.3),
                                     blurRadius: 12,
                                     spreadRadius: 1,
@@ -213,14 +210,12 @@ class _LibrairieViewState extends State<LibrairieView> {
                           boxShadow: !showBibliotheque
                               ? [
                                   BoxShadow(
-                                    // ignore: deprecated_member_use
                                     color: Colors.orange.withOpacity(0.4),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 3),
                                   ),
                                   BoxShadow(
-                                    // ignore: deprecated_member_use
                                     color: Colors.blue.withOpacity(0.3),
                                     blurRadius: 12,
                                     spreadRadius: 1,
@@ -248,11 +243,11 @@ class _LibrairieViewState extends State<LibrairieView> {
 
             const SizedBox(height: 20),
 
-            // 🔹 Contenu principal
+            //Contenu principal
             Expanded(
               child: showBibliotheque
-                  ? _buildBibliotheque()
-                  : _buildInformations(),
+                  ? buildBibliotheque()
+                  : buildInformations(),
             ),
           ],
         ),
@@ -260,10 +255,10 @@ class _LibrairieViewState extends State<LibrairieView> {
     );
   }
 
-  // Bibliothèque → GridView des documents
-  Widget _buildBibliotheque() {
+  // Bibliothèque
+  Widget buildBibliotheque() {
     if (filteredDocuments.isEmpty) {
-      return const Center(child: Text("Aucun document trouvé 😕"));
+      return const Center(child: Text("Aucun document trouvé "));
     }
 
     return GridView.builder(
@@ -328,112 +323,103 @@ class _LibrairieViewState extends State<LibrairieView> {
     );
   }
 
-  // Informations Côte d'Ivoire → Texte / Cards stylisées et interactives
-Widget _buildInformations() {
-  return ListView(
-    padding: const EdgeInsets.all(12),
-    children: [
-      _infoCard(
-        title: "Présentation du pays",
-        subtitle:
-            "La Côte d’Ivoire est située en Afrique de l’Ouest, avec Abidjan comme capitale économique et Yamoussoukro comme capitale politique.",
-        gradientColors: [Color(0xFFFF7F00), Color(0xFF1556B5)],
-        icon: Icons.public,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => DetailPage(
-                title: "Présentation du pays",
-                details:
-                    "La Côte d’Ivoire est située en Afrique de l’Ouest. \n\nCapitale économique : Abidjan \nCapitale politique : Yamoussoukro \nLangue officielle : français \nPopulation : environ 26 millions \nMonnaie : Franc CFA",
+  // Informations Côte d'Ivoire
+  Widget buildInformations() {
+    return ListView(
+      padding: const EdgeInsets.all(12),
+      children: [
+        infoCard(
+          title: "Présentation du pays",
+          subtitle:
+              "La Côte d’Ivoire est située en Afrique de l’Ouest, avec Abidjan comme capitale économique et Yamoussoukro comme capitale politique.",
+          gradientColors: [Color(0xFFFF7F00), Color(0xFF1556B5)],
+          icon: Icons.public,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => DetailPage(
+                  title: "Présentation du pays",
+                  details:
+                      "La Côte d’Ivoire est située en Afrique de l’Ouest. \n\nCapitale économique : Abidjan \nCapitale politique : Yamoussoukro \nLangue officielle : français \nPopulation : environ 26 millions \nMonnaie : Franc CFA",
+                ),
               ),
+            );
+          },
+        ),
+        infoCard(
+          title: "Régions",
+          subtitle:
+              "Le pays est divisé en 31 régions, chacune avec ses caractéristiques et sa culture locale.",
+          gradientColors: [Color(0xFF1556B5), Color(0xFFFF7F00)],
+          icon: Icons.map,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => RegionsPage(
+                  title: "Régions de la Côte d'Ivoire",
+                  regions: ["Abidjan", "Bouaké", "San Pedro", "Korhogo"],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // Card stylisée réutilisable
+  Widget infoCard({
+    required String title,
+    required String subtitle,
+    required List<Color> gradientColors,
+    required IconData icon,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors.last.withOpacity(0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
             ),
-          );
-        },
-      ),
-      _infoCard(
-        title: "Régions",
-        subtitle:
-            "Le pays est divisé en 31 régions, chacune avec ses caractéristiques et sa culture locale.",
-        gradientColors: [Color(0xFF1556B5), Color(0xFFFF7F00)],
-        icon: Icons.map,
-        onTap: () {
-          Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => RegionsPage(
-      title: "Régions de la Côte d'Ivoire", // <--- Obligatoire
-      regions: ["Abidjan", "Bouaké", "San Pedro", "Korhogo"], // Exemple
-    ),
-  ),
-);
-        },
-      ),
-      
-      
-      
-    ],
-  );
-}
-
-// Card stylisée réutilisable
-Widget _infoCard({
-  required String title,
-  required String subtitle,
-  required List<Color> gradientColors,
-  required IconData icon,
-  VoidCallback? onTap,
-}) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          ],
         ),
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: gradientColors.last.withOpacity(0.4),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
+        child: ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: 28),
           ),
-        ],
-      ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            // ignore: deprecated_member_use
-            color: Colors.white.withOpacity(0.2),
-            shape: BoxShape.circle,
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
-          child: Icon(icon, color: Colors.white, size: 28),
+          subtitle: Text(
+            subtitle,
+            style: const TextStyle(color: Colors.white70),
+          ),
+          trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white70),
         ),
-        title: Text(
-          title,
-          style: const TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(color: Colors.white70),
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white70),
       ),
-    ),
-  );
-}
-
-
-
-// Sous-carte stylisée pour sous-pages
-
-
-  // Fonction réutilisable pour chaque card
+    );
+  }
 }

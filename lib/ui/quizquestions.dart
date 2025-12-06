@@ -11,10 +11,10 @@ class Quizquestions extends StatefulWidget {
   });
 
   @override
-  State<Quizquestions> createState() => _QuizPageState();
+  State<Quizquestions> createState() => QuizPageState();
 }
 
-class _QuizPageState extends State<Quizquestions> {
+class QuizPageState extends State<Quizquestions> {
   int questionIndex = 0;
   int score = 0;
   int? selectedAnswer;
@@ -33,7 +33,7 @@ class _QuizPageState extends State<Quizquestions> {
         context: context,
         barrierDismissible: false,
         builder: (_) => AlertDialog(
-          title: const Text("🎉 Quiz terminé !"),
+          title: const Text("Quiz terminé !"),
           content: Text(
             "Tu as obtenu $score / ${widget.questions.length} bonnes réponses !",
           ),
@@ -88,7 +88,6 @@ class _QuizPageState extends State<Quizquestions> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isSelected
-                        // ignore: deprecated_member_use
                         ? Colors.orangeAccent.withOpacity(0.2)
                         : Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -109,16 +108,19 @@ class _QuizPageState extends State<Quizquestions> {
                 ),
               );
             }),
-            SizedBox(height: 20,),
+            SizedBox(height: 20),
             Center(
               child: ElevatedButton(
                 onPressed: selectedAnswer != null ? nextQuestion : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orangeAccent,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 60,
+                    vertical: 14,
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 child: const Text(
                   "Suivant",

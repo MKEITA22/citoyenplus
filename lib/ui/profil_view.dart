@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:on_mec/ui/login.dart';
-import 'package:on_mec/models/user_model.dart';
 
 class GradientIcon extends StatelessWidget {
   final IconData icon;
@@ -27,50 +26,36 @@ class GradientIcon extends StatelessWidget {
 }
 
 class ProfilView extends StatefulWidget {
-  final UserRegisterModel user;
-
-  const ProfilView({super.key, required this.user});
+  const ProfilView({super.key});
 
   @override
   State<ProfilView> createState() => _ProfilViewState();
 }
 
 class _ProfilViewState extends State<ProfilView> {
-  late String name;
-  late String email;
-  late String phone;
-  late String address;
-  late String avatar;
+  String name = '';
+  String email = '';
+  String phone = '';
+  String avatar = 'assets/default_avatar.png';
 
   final LinearGradient mecGradient = const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFFFF7F00),
-      Color(0xFF1556B5),
-    ],
+    colors: [Color(0xFFFF7F00), Color(0xFF1556B5)],
   );
 
   @override
-  void initState() {
-    super.initState();
-
-    name = widget.user.fullname;
-    email = widget.user.email;
-    phone = widget.user.phone;
-    address = widget.user.password;
-
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text("Mon Profil", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          "Mon Profil",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFF1556B5),
         foregroundColor: Colors.black,
       ),
 
@@ -79,29 +64,25 @@ class _ProfilViewState extends State<ProfilView> {
         child: Column(
           children: [
             // Avatar
-            CircleAvatar(
-              radius: 60,
-              backgroundImage: AssetImage(avatar),
-            ),
+            CircleAvatar(radius: 60, backgroundImage: AssetImage(avatar)),
 
             const SizedBox(height: 20),
 
-            _inputField(
-                label: "Nom complet",
-                value: name,
-                onChanged: (v) => setState(() => name = v)),
-            _inputField(
-                label: "E-mail",
-                value: email,
-                onChanged: (v) => setState(() => email = v)),
-            _inputField(
-                label: "Téléphone",
-                value: phone,
-                onChanged: (v) => setState(() => phone = v)),
-            _inputField(
-                label: "Adresse",
-                value: address,
-                onChanged: (v) => setState(() => address = v)),
+            inputField(
+              label: "Nom complet",
+              value: name,
+              onChanged: (v) => setState(() => name = v),
+            ),
+            inputField(
+              label: "E-mail",
+              value: email,
+              onChanged: (v) => setState(() => email = v),
+            ),
+            inputField(
+              label: "Téléphone",
+              value: phone,
+              onChanged: (v) => setState(() => phone = v),
+            ),
            
 
             const SizedBox(height: 25),
@@ -115,9 +96,9 @@ class _ProfilViewState extends State<ProfilView> {
               ),
               child: TextButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Profil mis à jour")),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text("Profil mis à jour")));
                 },
                 child: const Text(
                   "Enregistrer",
@@ -128,7 +109,7 @@ class _ProfilViewState extends State<ProfilView> {
 
             const SizedBox(height: 25),
 
-            // 🔥🔥🔥 Bouton Déconnexion
+            // Bouton Déconnexion
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -138,7 +119,6 @@ class _ProfilViewState extends State<ProfilView> {
               ),
               child: TextButton.icon(
                 onPressed: () {
-                  // 🔥 future : SharedPrefs.clear(), token.clear(), API logout…
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (_) => LoginView()),
@@ -148,8 +128,7 @@ class _ProfilViewState extends State<ProfilView> {
                 icon: Icon(Icons.logout, color: Colors.red.shade400),
                 label: Text(
                   "Déconnexion",
-                  style:
-                      TextStyle(color: Colors.red.shade400, fontSize: 16),
+                  style: TextStyle(color: Colors.red.shade400, fontSize: 16),
                 ),
               ),
             ),
@@ -162,7 +141,7 @@ class _ProfilViewState extends State<ProfilView> {
   }
 
   /// Champ personnalisé
-  Widget _inputField({
+  Widget inputField({
     required String label,
     required String value,
     required Function(String) onChanged,
@@ -183,9 +162,7 @@ class _ProfilViewState extends State<ProfilView> {
             maxLines: maxLines,
             controller: TextEditingController(text: value),
             onChanged: onChanged,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-            ),
+            decoration: InputDecoration(border: InputBorder.none),
           ),
         ),
         const SizedBox(height: 16),

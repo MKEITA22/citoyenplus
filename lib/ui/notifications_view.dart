@@ -10,42 +10,40 @@ class NotificationView extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           "Notifications",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
+        backgroundColor: Color(0xFF1556B5),
+        foregroundColor: Colors.black,
       ),
 
       body: ListView(
         padding: EdgeInsets.all(16),
         children: [
 
-          // 🔥 Notification : Like reçu
-          _notifItem(
-            title: "Nouvelle interaction ❤️",
+          // Notification : Like reçu
+          notifItem(
+            title: "Nouvelle interaction ",
             subtitle: "Mireille a liké ton post.",
             icon: Icons.favorite,
           ),
 
-          // 🔥 Notification : Commentaire reçu
-          _notifItem(
-            title: "Nouveau commentaire 💬",
+          // Notification : Commentaire reçu
+          notifItem(
+            title: "Nouveau commentaire ",
             subtitle: "Omar a commenté ton post.",
             icon: Icons.mode_comment_outlined,
           ),
 
-          // 🔥 BOUTON : Liste des actions
+          // BOUTON : Liste des actions
           GestureDetector(
             onTap: () {
-              // 👉 Navigation (à brancher)
+             
               Navigator.push(context, MaterialPageRoute(builder: (_) => MesActionsView(posts: [],)));
             },
-            child: _notifItem(
-              title: "Mes actions citoyennes 📝",
+            child: notifItem(
+              title: "Mes actions citoyennes ",
               subtitle: "Consulte tes signalements et leur statut.",
               icon: Icons.list_alt_rounded, // Icône dédié
               gradient: const LinearGradient(
@@ -59,24 +57,24 @@ class NotificationView extends StatelessWidget {
 
           SizedBox(height: 12),
 
-          // 👉 Anciennes notifications (toujours affichées)
-          _notifItem(
-            title: "Nouvelle mise à jour 👀",
+          // Anciennes notifications
+          notifItem(
+            title: "Nouvelle mise à jour",
             subtitle: "Une nouvelle version de l’application est disponible.",
             icon: Icons.system_update,
           ),
-          _notifItem(
-            title: "Nouveau message 💬",
+          notifItem(
+            title: "Nouveau message",
             subtitle: "Tu as reçu une réponse dans ton chat IA.",
             icon: Icons.chat_bubble_outline,
           ),
-          _notifItem(
-            title: "Badge débloqué 🏅",
+          notifItem(
+            title: "Badge débloqué ",
             subtitle: "Bravo, tu viens d’obtenir un nouveau badge !",
             icon: Icons.emoji_events_outlined,
           ),
-          _notifItem(
-            title: "Rappel 🔔",
+          notifItem(
+            title: "Rappel ",
             subtitle: "N’oublie pas ta session d’apprentissage du jour.",
             icon: Icons.notifications_active_outlined,
           ),
@@ -85,12 +83,12 @@ class NotificationView extends StatelessWidget {
     );
   }
 
-  // 🍀 Widget notification stylé
-  Widget _notifItem({
+  // Widget notification 
+  Widget notifItem({
     required String title,
     required String subtitle,
     required IconData icon,
-    Gradient? gradient, // Permet d'utiliser plusieurs styles
+    Gradient? gradient, 
   }) {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
@@ -100,7 +98,7 @@ class NotificationView extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
+      
             color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: Offset(0, 3),
@@ -110,7 +108,7 @@ class NotificationView extends StatelessWidget {
 
       child: Row(
         children: [
-          // 🌈 Icône stylé (gradient si défini)
+          // Icône
           Container(
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(

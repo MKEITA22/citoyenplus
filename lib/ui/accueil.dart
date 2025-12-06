@@ -7,7 +7,7 @@ import 'package:on_mec/ui/ajouter_view.dart';
 import 'package:on_mec/ui/librairie_view.dart';
 import 'package:on_mec/ui/quiz_view.dart';
 
-// GRADIENT ICON
+// DÉGRADÉE ICON
 
 class GradientIcon extends StatelessWidget {
   final IconData icon;
@@ -39,15 +39,15 @@ class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Home> createState() => HomeState();
 }
 
 //  HOME STATE
 
-class _HomeState extends State<Home> {
-  int _selectedIndex = 0;
+class HomeState extends State<Home> {
+  int selectedIndex = 0;
 
-  final List<Widget> _pages = [
+  final List<Widget> pages = [
     AccueilView(),
     QuizView(),
     AjouterView(),
@@ -61,19 +61,19 @@ class _HomeState extends State<Home> {
     colors: [Color(0xFFFF7F00), Color(0xFF1556B5)],
   );
 
-  void _onItemTapped(int index) {
+  void onItemTapped(int index) {
     if (index == 2) {
-      _showAddOptions();
+      showAddOptions();
     } else {
       setState(() {
-        _selectedIndex = index;
+        selectedIndex = index;
       });
     }
   }
 
   // BOTTOM SHEET DES CHOIX
 
-  void _showAddOptions() {
+  void showAddOptions() {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -101,7 +101,7 @@ class _HomeState extends State<Home> {
                 title: const Text("Ajouter une action citoyenne"),
                 onTap: () {
                   Navigator.pop(context);
-                  _showAddPost(context);
+                  showAddPost(context);
                 },
               ),
 
@@ -110,7 +110,7 @@ class _HomeState extends State<Home> {
                 title: const Text("Signaler une action citoyenne"),
                 onTap: () {
                   Navigator.pop(context);
-                  _showSignalementSheet(context);
+                  showSignalementSheet(context);
                 },
               ),
 
@@ -125,7 +125,7 @@ class _HomeState extends State<Home> {
   //  BOTTOM SHEET : AJOUT ACTION CITOYENNE
 
   bool isPicking = false;
-  void _showAddPost(BuildContext context) {
+  void showAddPost(BuildContext context) {
     TextEditingController descriptionController = TextEditingController();
     String? pickedImagePath;
 
@@ -175,7 +175,7 @@ class _HomeState extends State<Home> {
                   // IMAGE
                   GestureDetector(
                     onTap: () async {
-                      if (isPicking) return; // 🔥 empêche les double clics
+                      if (isPicking) return;
                       isPicking = true;
 
                       try {
@@ -193,7 +193,7 @@ class _HomeState extends State<Home> {
                         debugPrint("Erreur picker: $e");
                       }
 
-                      isPicking = false; // 🔥 on réactive le bouton
+                      isPicking = false;
                     },
 
                     child: Container(
@@ -250,7 +250,7 @@ class _HomeState extends State<Home> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
-                                "Ajoute une petite description de ton action 😉",
+                                "Ajoute une petite description de ton action",
                               ),
                             ),
                           );
@@ -260,9 +260,7 @@ class _HomeState extends State<Home> {
                         if (pickedImagePath == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text(
-                                "Ajoute une image pour ton action 📸",
-                              ),
+                              content: Text("Ajoute une image pour ton action"),
                             ),
                           );
                           return;
@@ -316,7 +314,7 @@ class _HomeState extends State<Home> {
 
   // BOTTOM SHEET SIGNALEMENT
 
-  void _showSignalementSheet(BuildContext context) {
+  void showSignalementSheet(BuildContext context) {
     final List<Map<String, dynamic>> themes = [
       {
         "titre": "Pollution / Déchets",
@@ -386,7 +384,7 @@ class _HomeState extends State<Home> {
                   return GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
-                      _showSignalementDetails(context, theme["titre"]);
+                      showSignalementDetails(context, theme["titre"]);
                     },
 
                     child: Container(
@@ -427,7 +425,7 @@ class _HomeState extends State<Home> {
 
   // DETAILS SIGNALEMENT
 
-  void _showSignalementDetails(BuildContext context, String theme) {
+  void showSignalementDetails(BuildContext context, String theme) {
     TextEditingController descCtrl = TextEditingController();
     String? pickedImagePath;
     bool isPicking = false;
@@ -599,18 +597,17 @@ class _HomeState extends State<Home> {
     );
   }
 
-
   // BUILD HOME SCREEN
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: pages[selectedIndex],
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: selectedIndex,
+        onTap: onItemTapped,
         showUnselectedLabels: true,
         selectedFontSize: 12,
         unselectedFontSize: 12,

@@ -7,16 +7,16 @@ class LivrePdfView extends StatefulWidget {
 
   @override
   // ignore: library_private_types_in_public_api
-  _LivrePdfViewState createState() => _LivrePdfViewState();
+  LivrePdfViewState createState() => LivrePdfViewState();
 }
 
-class _LivrePdfViewState extends State<LivrePdfView> {
-  late PdfControllerPinch _pdfController;
+class LivrePdfViewState extends State<LivrePdfView> {
+  late PdfControllerPinch pdfController;
 
   @override
   void initState() {
     super.initState();
-    _pdfController = PdfControllerPinch(
+    pdfController = PdfControllerPinch(
       document: PdfDocument.openAsset(widget.pdf),
     );
   }
@@ -25,7 +25,7 @@ class _LivrePdfViewState extends State<LivrePdfView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Lecture PDF")),
-      body: PdfViewPinch(controller: _pdfController),
+      body: PdfViewPinch(controller: pdfController),
     );
   }
 }

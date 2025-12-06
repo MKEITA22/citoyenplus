@@ -13,8 +13,7 @@ class AccueilView extends StatefulWidget {
 // Liste des tags PDF (inchangé)
 List<String> tags = ["Environnement", "Incivisme", "Sécurité", "Signalement"];
 
-
-// 🔥 Nouveau modèle de post
+// modèle de post
 
 class PostModel {
   final String username;
@@ -37,7 +36,6 @@ class PostModel {
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 }
-
 
 //  Liste des posts
 
@@ -138,9 +136,9 @@ class _AccueilViewState extends State<AccueilView> {
 
   @override
   Widget build(BuildContext context) {
-    // Tri du plus récent au plus ancien (PLACÉ ICI)
-              final orderedPosts = List<PostModel>.from(posts)
-                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    // Tri du plus récent au plus ancien
+    final orderedPosts = List<PostModel>.from(posts)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return Scaffold(
       appBar: EntetePersonalise(),
 
@@ -214,7 +212,7 @@ class _AccueilViewState extends State<AccueilView> {
                       height: 380,
                       child: Center(
                         child: Text(
-                          "Aucun document trouvé 😕",
+                          "Aucun document trouvé ",
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                       ),
@@ -320,8 +318,11 @@ class _AccueilViewState extends State<AccueilView> {
                   children: [
                     Align(
                       alignment: Alignment.topLeft,
-                      child: Icon(Icons.format_quote,
-                          color: Colors.white, size: 80),
+                      child: Icon(
+                        Icons.format_quote,
+                        color: Colors.white,
+                        size: 80,
+                      ),
                     ),
 
                     const Padding(
@@ -337,8 +338,11 @@ class _AccueilViewState extends State<AccueilView> {
 
                     Align(
                       alignment: Alignment.bottomRight,
-                      child: Icon(Icons.favorite_border,
-                          color: Colors.white, size: 40),
+                      child: Icon(
+                        Icons.favorite_border,
+                        color: Colors.white,
+                        size: 40,
+                      ),
                     ),
                   ],
                 ),
@@ -346,12 +350,7 @@ class _AccueilViewState extends State<AccueilView> {
 
               const SizedBox(height: 30),
 
-         
-              // 🔥 LISTE DES POSTS TRIÉE
-           
-
-              
-
+              // LISTE DES POSTS TRIÉE
               ListView.builder(
                 itemCount: orderedPosts.length,
                 shrinkWrap: true,
