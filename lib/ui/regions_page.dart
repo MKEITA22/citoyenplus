@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:on_mec/ui/detail_page.dart';
+import 'detail_page.dart';
 
 class RegionsPage extends StatelessWidget {
   final String title;

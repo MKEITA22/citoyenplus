@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:on_mec/ui/detail_page.dart';
-import 'package:on_mec/ui/regions_page.dart';
+import 'detail_page.dart';
+import 'regions_page.dart';
 import 'livre_pdf_view.dart';
 
 class LibrairieView extends StatefulWidget {

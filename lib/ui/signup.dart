@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:on_mec/ui/login.dart';
-import 'package:on_mec/widgets/inputfield.dart';
+import 'login.dart';
+import '../widgets/inputfield.dart';
 
 class CreateAccountView extends StatefulWidget {
   const CreateAccountView({super.key});

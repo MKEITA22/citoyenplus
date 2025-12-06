@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:on_mec/ui/entete.dart';
-import 'package:on_mec/ui/quizquestions.dart';
+import 'entete.dart';
+import 'quizquestions.dart';
 
 class QuizView extends StatelessWidget {
   const QuizView({super.key});

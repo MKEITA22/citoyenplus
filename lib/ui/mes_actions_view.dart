@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:on_mec/ui/accueil_view.dart';
+import 'accueil_view.dart';
 
 class MesActionsView extends StatelessWidget {
   final List<PostModel> posts;

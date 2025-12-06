@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:on_mec/ui/login.dart';
+import 'login.dart';
 
 class GradientIcon extends StatelessWidget {
   final IconData icon;

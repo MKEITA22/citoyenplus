@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:on_mec/ui/accueil_view.dart';
-import 'package:on_mec/ui/ai_chat_view.dart';
-import 'package:on_mec/ui/ajouter_view.dart';
-import 'package:on_mec/ui/librairie_view.dart';
-import 'package:on_mec/ui/quiz_view.dart';
+import 'accueil_view.dart';
+import 'ai_chat_view.dart';
+import 'ajouter_view.dart';
+import 'librairie_view.dart';
+import 'quiz_view.dart';
 
 // DÉGRADÉE ICON
 

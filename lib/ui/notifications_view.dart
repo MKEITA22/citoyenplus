@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:on_mec/ui/mes_actions_view.dart';
+import 'mes_actions_view.dart';
 
 class NotificationView extends StatelessWidget {
   const NotificationView({super.key});

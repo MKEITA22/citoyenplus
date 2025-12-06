@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:on_mec/ui/entete.dart';
+import 'entete.dart';
 
 class AjouterView extends StatefulWidget {
   const AjouterView({super.key});
