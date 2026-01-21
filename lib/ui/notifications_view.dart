@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'mes_actions_view.dart';
+
+
 
 class NotificationView extends StatelessWidget {
   const NotificationView({super.key});
@@ -99,7 +102,7 @@ class NotificationView extends StatelessWidget {
         boxShadow: [
           BoxShadow(
       
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha((0.05 * 255).round()),
             blurRadius: 8,
             offset: Offset(0, 3),
           ),

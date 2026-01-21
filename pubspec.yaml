@@ -1,4 +1,4 @@
-name: on_mec
+name: citoyen_plus
 description: "ebook app"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -31,8 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
   
-
-  http: ^1.6.0
   shared_preferences: ^2.0.15
 
 
@@ -42,6 +40,7 @@ dependencies:
   pdfx: ^2.9.2
   image_picker: ^1.1.2
   http_methods: ^1.1.1
+  http: ^1.6.0
 
 
 dev_dependencies:

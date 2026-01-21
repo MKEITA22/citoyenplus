@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'entete.dart';
+
 
 class AiChatView extends StatefulWidget {
   const AiChatView({super.key});

@@ -1,15 +1,19 @@
+// ignore: unused_element
+// ignore: unused_element
 import 'package:flutter/material.dart';
+
 import 'login.dart';
-import '../widgets/inputfield.dart';
+
+import 'package:citoyen_plus/services/auth_service.dart';
 
 class CreateAccountView extends StatefulWidget {
   const CreateAccountView({super.key});
 
   @override
-  State<CreateAccountView> createState() => CreateAccountViewState();
+  State<CreateAccountView> createState() => _CreateAccountViewState();
 }
 
-class CreateAccountViewState extends State<CreateAccountView> {
+class _CreateAccountViewState extends State<CreateAccountView> {
   final formKey = GlobalKey<FormState>();
 
   final TextEditingController fullnameCtrl = TextEditingController();
@@ -19,6 +23,43 @@ class CreateAccountViewState extends State<CreateAccountView> {
   final TextEditingController confirmPasswordCtrl = TextEditingController();
 
   bool isLoading = false;
+  bool hidePassword = true;
+
+  Future<void> handleCreateAccountView() async {
+    if (!formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    final result = await AuthService.signup(
+      name: fullnameCtrl.text.trim(),
+      email: emailCtrl.text.trim(),
+      phone: phoneCtrl.text.trim(),
+      password: passwordCtrl.text.trim(),
+    );
+
+    setState(() => isLoading = false);
+
+    if (result["success"]) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Compte créé avec succès"),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result["message"]),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,62 +73,100 @@ class CreateAccountViewState extends State<CreateAccountView> {
         elevation: 0,
         centerTitle: true,
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
           key: formKey,
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 25),
 
-              inputField(
+              TextFormField(
                 controller: fullnameCtrl,
-                label: "Nom complet",
-                icon: Icons.person,
-                validator: (v) => v!.isEmpty ? "Nom requis" : null,
+                decoration: const InputDecoration(
+                  labelText: "Nom complet",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value!.isEmpty ? "Nom et prénoms requis" : null,
               ),
 
               const SizedBox(height: 20),
 
-              inputField(
+              TextFormField(
                 controller: emailCtrl,
-                label: "Email",
-                icon: Icons.email_outlined,
-                keyboard: TextInputType.emailAddress,
-                validator: (v) => v!.contains("@") ? null : "Email invalide",
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: "Email",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value!.contains("@") ? null : "Email invalide",
               ),
 
               const SizedBox(height: 20),
 
-              inputField(
+              TextFormField(
                 controller: phoneCtrl,
-                label: "Téléphone",
-                icon: Icons.phone,
-                keyboard: TextInputType.phone,
-                validator: (v) => v!.length < 8 ? "Numéro invalide" : null,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: "Téléphone",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value!.length < 10 ? "Numéro invalide" : null,
               ),
 
               const SizedBox(height: 20),
 
-              inputField(
+              TextFormField(
                 controller: passwordCtrl,
-                label: "Mot de passe",
-                icon: Icons.lock_outline,
-                keyboard: TextInputType.visiblePassword,
-                validator: (v) => v!.length < 6 ? "Min. 6 caractères" : null,
+                obscureText: hidePassword,
+                decoration: InputDecoration(
+                  labelText: "Mot de passe",
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      hidePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () =>
+                        setState(() => hidePassword = !hidePassword),
+                  ),
+                ),
+                validator: (v) =>
+                    v!.length < 6 ? "Min. 6 caractères" : null,
               ),
 
               const SizedBox(height: 20),
 
-              inputField(
+              TextFormField(
                 controller: confirmPasswordCtrl,
-                label: "Confirmer le mot de passe",
-                icon: Icons.lock_person_outlined,
-                keyboard: TextInputType.visiblePassword,
-                validator: (v) => v!.isEmpty ? "Répète le mot de passe" : null,
+                obscureText: hidePassword,
+                decoration: InputDecoration(
+                  labelText: "Confirmer mot de passe",
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      hidePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () =>
+                        setState(() => hidePassword = !hidePassword),
+                  ),
+                ),
+                validator: (v) {
+                  if (v!.length < 6) {
+                    return "Min. 6 caractères";
+                  }
+                  if (v != passwordCtrl.text) {
+                    return "Les mots de passe ne correspondent pas";
+                  }
+                  return null;
+                },
               ),
 
               const SizedBox(height: 30),
@@ -95,13 +174,13 @@ class CreateAccountViewState extends State<CreateAccountView> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginView()),
-                    );
-                  },
-                  child: Text("Créer un compte"),
+                  onPressed: isLoading ? null : handleCreateAccountView,
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Créer mon compte",
+                          style: TextStyle(fontSize: 16),
+                        ),
                 ),
               ),
 
@@ -115,10 +194,10 @@ class CreateAccountViewState extends State<CreateAccountView> {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => LoginView()),
+                        MaterialPageRoute(builder: (_) => const LoginView()),
                       );
                     },
-                    child: Text(
+                    child: const Text(
                       "Se connecter",
                       style: TextStyle(
                         color: Colors.blueAccent,

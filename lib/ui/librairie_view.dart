@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'detail_page.dart';
 import 'regions_page.dart';
+
+
 import 'livre_pdf_view.dart';
 
 class LibrairieView extends StatefulWidget {
@@ -95,7 +98,7 @@ class _LibrairieViewState extends State<LibrairieView> {
                 borderRadius: BorderRadius.circular(45),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: const Color.fromRGBO(0, 0, 0, 0.05),
                     blurRadius: 5,
                     offset: const Offset(0, 2),
                   ),
@@ -160,13 +163,13 @@ class _LibrairieViewState extends State<LibrairieView> {
                           boxShadow: showBibliotheque
                               ? [
                                   BoxShadow(
-                                    color: Colors.orange.withOpacity(0.4),
+                                     color: const Color.fromRGBO(0, 0, 0, 0.4),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 3),
                                   ),
                                   BoxShadow(
-                                    color: Colors.blue.withOpacity(0.3),
+                                     color: const Color.fromRGBO(0, 0, 0, 0.3),
                                     blurRadius: 12,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 3),
@@ -210,13 +213,13 @@ class _LibrairieViewState extends State<LibrairieView> {
                           boxShadow: !showBibliotheque
                               ? [
                                   BoxShadow(
-                                    color: Colors.orange.withOpacity(0.4),
+                                     color: const Color.fromRGBO(0, 0, 0, 0.4),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 3),
                                   ),
                                   BoxShadow(
-                                    color: Colors.blue.withOpacity(0.3),
+                                     color: const Color.fromRGBO(0, 0, 0, 0.3),
                                     blurRadius: 12,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 3),
@@ -390,7 +393,7 @@ class _LibrairieViewState extends State<LibrairieView> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: gradientColors.last.withOpacity(0.4),
+              color: gradientColors.last.withAlpha((0.4 * 255).round()),
               blurRadius: 10,
               offset: const Offset(0, 6),
             ),
@@ -400,7 +403,7 @@ class _LibrairieViewState extends State<LibrairieView> {
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withAlpha((0.2 * 255).round()),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: Colors.white, size: 28),

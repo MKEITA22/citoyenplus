@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+
 import 'notifications_view.dart';
 import 'profil_view.dart';
+
+
 
 // Widget pour les icônes avec dégradé
 class GradientIcon extends StatelessWidget {

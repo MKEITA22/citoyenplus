@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'ui/splash_view.dart';
 
+
 void main() {
   runApp(const MyApp());
 }

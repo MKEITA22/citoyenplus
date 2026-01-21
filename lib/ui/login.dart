@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'accueil.dart';
 import 'signup.dart';
+
+
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -27,7 +30,7 @@ class LoginViewState extends State<LoginView> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha((0.05 * 255).round()),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -97,7 +100,7 @@ class LoginViewState extends State<LoginView> {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withAlpha((0.05 * 255).round()),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
                     ),

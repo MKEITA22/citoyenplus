@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'entete.dart';
 import 'quizquestions.dart';
+
+
 
 class QuizView extends StatelessWidget {
   const QuizView({super.key});
@@ -95,7 +98,7 @@ class QuizView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
+                              color: Colors.grey.withAlpha((0.2 * 255).round()),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),

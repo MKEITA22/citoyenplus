@@ -88,7 +88,7 @@ class QuizPageState extends State<Quizquestions> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Colors.orangeAccent.withOpacity(0.2)
+                        ? Colors.orangeAccent.withAlpha(51)
                         : Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(

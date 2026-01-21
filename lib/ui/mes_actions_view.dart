@@ -1,6 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'accueil_view.dart';
+
+
+
+import '../models/post.dart';
+
 
 class MesActionsView extends StatelessWidget {
   final List<PostModel> posts;
@@ -89,7 +93,7 @@ class MesActionsView extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha((0.05 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),

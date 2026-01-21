@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-Widget inputField({
-  required TextEditingController controller,
+Widget inputField(TextEditingController controller, {
+
   required String label,
   required IconData icon,
   TextInputType? keyboard,
-  String? Function(String?)? validator,
+  String? Function(String?)? validator, required bool obscureText, required IconButton suffixIcon,
 }) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
