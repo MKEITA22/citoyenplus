@@ -1,260 +1,31 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:citoyen_plus/ui/entete.dart';
-import 'package:citoyen_plus/ui/livre_pdf_view.dart';
-import '../models/post.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/signalement.dart';
-import '../services/api_service.dart';
-import '../services/auth_service.dart';
+import '../services/recuperer_signalement_service.dart';
+import '../widgets/post_card.dart';
+import '../widgets/signalement_card.dart';
+import '../ui/entete.dart';
+import '../ui/livre_pdf_view.dart';
+import '../models/post.dart';
+import '../services/recuperer_actualite_service.dart';
 
-/// ---------------------------
-/// POST CARD
-/// ---------------------------
-class PostCard extends StatefulWidget {
-  final String username;
-  final String imagePath;
-  final int likes;
-  final int comments;
-  final String tag;
-  final String description;
-
-  const PostCard({
-    super.key,
-    required this.username,
-    required this.imagePath,
-    required this.likes,
-    required this.comments,
-    required this.tag,
-    this.description = "",
-  });
-
-  @override
-  State<PostCard> createState() => _PostCardState();
-}
-
-class _PostCardState extends State<PostCard> {
-  late int likeCount;
-  bool isLiked = false;
-
-  @override
-  void initState() {
-    super.initState();
-    likeCount = widget.likes;
-  }
-
-  void toggleLike() {
-    setState(() {
-      isLiked = !isLiked;
-      likeCount += isLiked ? 1 : -1;
-      if (likeCount < 0) likeCount = 0;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final List<String> displayTags = widget.tag
-        .split(',')
-        .map((e) => e.trim())
-        .toList();
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromRGBO(0, 0, 0, 0.1),
-            blurRadius: 6,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Tags
-          if (displayTags.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Wrap(
-                spacing: 6,
-                children: displayTags.map((t) {
-                  List<Color> colors;
-                  switch (t) {
-                    case "Action Citoyenne":
-                      colors = [Color(0xFFFF7F00), Color(0xFF1556B5)];
-                      break;
-                    default:
-                      colors = [Colors.blue, Colors.purple];
-                  }
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: colors,
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      t,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  radius: 20,
-                  backgroundImage: AssetImage('assets/user.jpg'),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  widget.username,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const Spacer(),
-                const Icon(Icons.more_vert),
-              ],
-            ),
-          ),
-
-          // Image
-          SizedBox(
-            height: 220,
-            width: double.infinity,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(15),
-                bottomRight: Radius.circular(15),
-              ),
-              child: _buildImage(widget.imagePath),
-            ),
-          ),
-
-          // Description
-          if (widget.description.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Text(widget.description),
-            ),
-
-          // Actions
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: Icon(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: isLiked ? Colors.red : Colors.black,
-                    size: 28,
-                  ),
-                  onPressed: toggleLike,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.mode_comment_outlined, size: 26),
-                  onPressed: () {},
-                ),
-                const Spacer(),
-              ],
-            ),
-          ),
-
-          // Likes
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Text(
-              "Aimé par $likeCount personnes",
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-
-          // Commentaires
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            child: Text(
-              "Voir les ${widget.comments} commentaires",
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImage(String path) {
-    if (path.isEmpty) {
-      return Container(
-        color: Colors.grey[200],
-        child: const Center(child: Icon(Icons.broken_image)),
-      );
-    }
-
-    if (path.startsWith('assets/')) {
-      return Image.asset(
-        path,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Colors.grey[200],
-          child: const Center(child: Icon(Icons.broken_image)),
-        ),
-      );
-    } else {
-      final file = File(path);
-      if (!file.existsSync()) {
-        return Container(
-          color: Colors.grey[200],
-          child: const Center(child: Icon(Icons.broken_image)),
-        );
-      }
-      return Image.file(
-        file,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Colors.grey[200],
-          child: const Center(child: Icon(Icons.broken_image)),
-        ),
-      );
-    }
-  }
-}
-
-/// ---------------------------
-/// ACCUEIL VIEW
-/// ---------------------------
 class AccueilView extends StatefulWidget {
-  const AccueilView({super.key});
+  final VoidCallback? onNotificationPressed;
+
+  const AccueilView({super.key, this.onNotificationPressed});
 
   @override
   State<AccueilView> createState() => _AccueilViewState();
 }
 
 class _AccueilViewState extends State<AccueilView> {
-  List<PostModel> posts = [];
-  List<SignalementModel> signalements = [];
-  bool isLoadingPosts = true;
-  bool isLoadingSignalements = true;
-
   final TextEditingController _searchCtrl = TextEditingController();
   late List<Map<String, String>> filteredDocuments;
+
+  Future<List<PostModel>> _futurePosts = Future.value([]);
+  Future<List<SignalementModel>> _futureSignalements = Future.value([]);
+
+  String userToken = "";
 
   final List<Map<String, String>> documents = [
     {
@@ -295,14 +66,28 @@ class _AccueilViewState extends State<AccueilView> {
     super.initState();
     filteredDocuments = List<Map<String, String>>.from(documents);
     _searchCtrl.addListener(() => filterDocuments(_searchCtrl.text));
-    _loadPosts();
-    _loadSignalements();
+    _loadData();
   }
 
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
+  // ✅ Un seul appel SharedPreferences pour tout charger
+  String _timeAgo(DateTime date) {
+    final diff = DateTime.now().difference(date);
+    if (diff.inMinutes < 1)  return 'À l\'instant';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} min';
+    if (diff.inHours < 24)   return '${diff.inHours} h';
+    if (diff.inDays < 7)     return '${diff.inDays} j';
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Future<void> _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    userToken = prefs.getString("token") ?? "";
+    if (!mounted) return;
+    setState(() {
+      _futurePosts = RecupererActualiteService.fetchAllPosts(userToken);
+      _futureSignalements =
+          RecupererSignalementService.fetchAllSignalement(userToken);
+    });
   }
 
   void filterDocuments(String query) {
@@ -320,44 +105,23 @@ class _AccueilViewState extends State<AccueilView> {
     });
   }
 
-  Future<void> _loadPosts() async {
-    try {
-      final token = await AuthService.getToken();
-      if (token == null || token.isEmpty) {
-        setState(() => isLoadingPosts = false);
-        return;
-      }
-      final result = await ApiService.fetchPosts(token);
-      setState(() {
-        posts = result;
-        isLoadingPosts = false;
-      });
-    } catch (e) {
-     
-      setState(() => isLoadingPosts = false);
-    }
-  }
-
-  Future<void> _loadSignalements() async {
-    try {
-      final token = await AuthService.getToken() ?? 'USER_TOKEN_ICI';
-      final result = await ApiService.fetchSignalements(token);
-      setState(() {
-        signalements = result;
-        isLoadingSignalements = false;
-      });
-    } catch (e) {
-     
-      setState(() => isLoadingSignalements = false);
-    }
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: EntetePersonalise(),
-      body: SingleChildScrollView(
-        child: Padding(
+      appBar: EntetePersonalise(
+        onNotificationPressed: widget.onNotificationPressed,
+      ),
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        color: const Color(0xFFFF7F00),
+        child: SingleChildScrollView(
+          child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,12 +138,16 @@ class _AccueilViewState extends State<AccueilView> {
               ),
               const SizedBox(height: 20),
 
-              // Recherche
+              // ── Recherche ──────────────────────────────────────────────
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(45),
+                  border: Border.all(
+                    color: const Color(0xFFDDDDDD),
+                    width: 1.5,
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -413,20 +181,17 @@ class _AccueilViewState extends State<AccueilView> {
               ),
               const SizedBox(height: 20),
 
-              // Liste des PDF
-              filteredDocuments.isEmpty
-                  ? SizedBox(
-                      height: 380,
-                      child: Center(
+              // ── Liste des PDF (scroll horizontal) ─────────────────────
+              SizedBox(
+                height: 340,
+                child: filteredDocuments.isEmpty
+                    ? Center(
                         child: Text(
                           "Aucun document trouvé",
                           style: TextStyle(color: Colors.grey[700]),
                         ),
-                      ),
-                    )
-                  : SizedBox(
-                      height: 380,
-                      child: ListView.builder(
+                      )
+                    : ListView.builder(
                         scrollDirection: Axis.horizontal,
                         itemCount: filteredDocuments.length,
                         itemBuilder: (context, i) {
@@ -453,18 +218,21 @@ class _AccueilViewState extends State<AccueilView> {
                             child: Container(
                               width: 190,
                               margin: const EdgeInsets.only(right: 20),
+                              clipBehavior: Clip.hardEdge,
+                              decoration: const BoxDecoration(),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   SizedBox(
-                                    height: 280,
+                                    height: 235,
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.asset(
                                         doc["couverture"] ?? '',
                                         fit: BoxFit.cover,
                                         errorBuilder: (c, e, s) => Container(
-                                          height: 280,
+                                          height: 235,
                                           color: Colors.grey[200],
                                           child: const Center(
                                             child: Icon(Icons.broken_image),
@@ -497,63 +265,96 @@ class _AccueilViewState extends State<AccueilView> {
                           );
                         },
                       ),
-                    ),
+              ),
 
               const SizedBox(height: 20),
+
+              // ── SIGNALEMENTS ──────────────────────────────────────────
               const Text(
                 "Derniers signalements",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-
-              isLoadingSignalements
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
+              FutureBuilder<List<SignalementModel>>(
+                future: _futureSignalements,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Erreur: ${snapshot.error}'));
+                  }
+                  final signalements = snapshot.data ?? [];
+                  if (signalements.isEmpty) {
+                    return const Center(
+                      child: Text('Aucun signalement disponible'),
+                    );
+                  }
+                  // Hauteur généreuse pour absorber le "voir plus"
+                  return SizedBox(
+                    height: 380,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
                       itemCount: signalements.length,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        final p = posts[index];
-                        return PostCard(
-                          username: p.username ?? "Citoyen",
-                          imagePath: p.imageUrl ?? '',
-                          likes: p.likes,
-                          comments: p.comments,
-                          tag: (p.tags), // assure un fallback
-                          description: p.description,
+                        final s = signalements[index];
+                        return SizedBox(
+                          width: 260,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 14),
+                            child: SignalementCard(
+                              nom: s.titre,
+                              description: s.description,
+                              photoUrl: s.photo,
+                              statut: s.statut,
+                              categorie: s.categorieNom,
+                            ),
+                          ),
                         );
                       },
                     ),
+                  );
+                },
+              ),
 
               const SizedBox(height: 20),
+
+              // ── POSTS ─────────────────────────────────────────────────
               const Text(
                 "Derniers posts",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-
-              isLoadingPosts
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      itemCount: posts.length,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        final p = posts[index];
-                        return PostCard(
-                          username: p.username ?? "Citoyen",
-                          imagePath: p.imageUrl ?? '',
-                          likes: p.likes,
-                          comments: p.comments,
-                          tag: p.tags,
-                          description: p.description ,
-                        );
-                      },
-                    ),
+              FutureBuilder<List<PostModel>>(
+                future: _futurePosts,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Erreur: ${snapshot.error}'));
+                  }
+                  final posts = snapshot.data ?? [];
+                  if (posts.isEmpty) {
+                    return const Center(child: Text('Aucun post disponible'));
+                  }
+                  // ✅ Column à la place du ListView imbriqué
+                  return Column(
+                    children: posts.map((post) {
+                      return PostCard(
+                        title: post.title,
+                        content: post.content,
+                        timeAgo: _timeAgo(post.date),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
 
               const SizedBox(height: 20),
             ],
           ),
+        ),
         ),
       ),
     );

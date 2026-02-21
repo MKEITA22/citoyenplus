@@ -1,8 +1,11 @@
+import 'package:citoyen_plus/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'ui/splash_view.dart';
 
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.init();
   runApp(const MyApp());
 }
 

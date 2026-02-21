@@ -6,7 +6,7 @@ import '../models/signalement.dart';
 
 
 class ApiService {
-  static const String baseUrl = 'https://mec-ci.org/api/v1';
+  static const String baseUrl = 'https://admin.mec-ci.org/api/v1';  
 
   static Map<String, String> headers(String token) => {
         'Accept': 'application/json',
@@ -30,7 +30,7 @@ class ApiService {
   // GET SIGNALEMENTS
   static Future<List<SignalementModel>> fetchSignalements(String token) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/signalement-citoyen/{id}'),
+      Uri.parse('$baseUrl/signalement-citoyen'),
       headers: headers(token),
     );
 

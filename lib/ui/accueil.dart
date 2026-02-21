@@ -1,40 +1,15 @@
-import 'dart:io';
+import 'package:citoyen_plus/ui/accueil_view.dart';
+import 'package:citoyen_plus/ui/mes_actions_view.dart';
+import 'package:citoyen_plus/ui/notifications_view.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-
-import 'accueil_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/categorie_signalement_model.dart';
+import '../services/post_service.dart';
+import '../widgets/signalement_sheet.dart';
 import 'ai_chat_view.dart';
 import 'ajouter_view.dart';
 import 'librairie_view.dart';
 import 'quiz_view.dart';
-
-// DÉGRADÉE ICON
-
-import '../services/api_service.dart';
-
-
-class GradientIcon extends StatelessWidget {
-  final IconData icon;
-  final double size;
-  final Gradient gradient;
-
-  const GradientIcon({
-    super.key,
-    required this.icon,
-    required this.size,
-    required this.gradient,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ShaderMask(
-      blendMode: BlendMode.srcIn,
-      shaderCallback: (bounds) =>
-          gradient.createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
-      child: Icon(icon, size: size, color: Colors.white),
-    );
-  }
-}
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -44,22 +19,28 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
+  // ✅ Index étendu :
+  // 0 = Accueil, 1 = Quiz, 2 = (bouton +), 3 = Librairie, 4 = IA
+  // 5 = Notifications, 6 = MesActions (cachés de la navbar)
   int selectedIndex = 0;
-  final String userToken = "TOKEN_UTILISATEUR_ICI";
 
-  final List<Widget> pages = const [
-    AccueilView(),
+  List<CategorieSignalementModel> categories = [];
+
+  late final List<Widget> pages = [
+    AccueilView(onNotificationPressed: () => goTo(5)),
     QuizView(),
     AjouterView(),
     LibrairieView(),
     AiChatView(),
+    NotificationView(
+      onMesActionsPressed: () => goTo(6),
+    ),
+    MesActionsView(posts: const [], onBackPressed: () => goTo(5)),
   ];
 
-  final Gradient mecGradient = const LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0xFFFF7F00), Color(0xFF1556B5)],
-  );
+  void goTo(int index) {
+    setState(() => selectedIndex = index);
+  }
 
   void onItemTapped(int index) {
     if (index == 2) {
@@ -67,6 +48,12 @@ class HomeState extends State<Home> {
     } else {
       setState(() => selectedIndex = index);
     }
+  }
+
+  // Retourne l'index navbar correspondant (5 et 6 → pas d'onglet sélectionné)
+  int get _navIndex {
+    if (selectedIndex <= 4) return selectedIndex;
+    return 0; // accueil sélectionné par défaut quand on est sur notif/actions
   }
 
   void showAddOptions() {
@@ -80,25 +67,27 @@ class HomeState extends State<Home> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Que souhaites-tu faire ?",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text(
+              "Que souhaites-tu faire ?",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 20),
             ListTile(
-              leading:
-                  const Icon(Icons.volunteer_activism, color: Colors.green),
-              title: const Text("Ajouter une action citoyenne"),
+              leading: const Icon(Icons.volunteer_activism, color: Colors.green),
+              title: const Text("Poster une action citoyenne"),
               onTap: () {
                 Navigator.pop(context);
                 showAddPost();
               },
             ),
             ListTile(
-              leading:
-                  const Icon(Icons.emoji_events, color: Colors.orange),
+              leading: const Icon(Icons.emoji_events, color: Colors.orange),
               title: const Text("Signaler une action citoyenne"),
               onTap: () {
                 Navigator.pop(context);
-                showSignalementSheet();
+                showSignalementSheet(context, (newSignalement) {
+                  setState(() {});
+                });
               },
             ),
           ],
@@ -108,214 +97,180 @@ class HomeState extends State<Home> {
   }
 
   void showAddPost() {
-    final descCtrl = TextEditingController();
-    String? imagePath;
-    bool isPicking = false;
+    final TextEditingController titreController = TextEditingController();
+    final TextEditingController excerptController = TextEditingController();
+    final TextEditingController contentController = TextEditingController();
+    bool _isLoading = false;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (_) => StatefulBuilder(
         builder: (_, setModalState) => Padding(
           padding: EdgeInsets.fromLTRB(
-            20,
-            20,
-            20,
-            MediaQuery.of(context).viewInsets.bottom + 20,
+            24, 24, 24,
+            MediaQuery.of(context).viewInsets.bottom + 24,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // ── Barre de drag ─────────────────────────────────────
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+
+              // ── Titre ─────────────────────────────────────────────
               Row(
                 children: [
-                  const Text("Créer une action citoyenne",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF7F00), Color(0xFF1556B5)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.edit_note_rounded, color: Colors.white, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Poster une actualité',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black87,
+                      letterSpacing: -0.3,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              GestureDetector(
-                onTap: () async {
-                  if (isPicking) return;
-                  isPicking = true;
-                  final img =
-                      await ImagePicker().pickImage(source: ImageSource.gallery);
-                  if (img != null) {
-                    setModalState(() => imagePath = img.path);
-                  }
-                  isPicking = false;
-                },
-                child: Container(
-                  height: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: imagePath == null
-                      ? const Icon(Icons.add_a_photo,
-                          size: 50, color: Colors.grey)
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: Image.file(File(imagePath!), fit: BoxFit.cover),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 24),
+
+              // ── Champ Titre ───────────────────────────────────────
+              _buildField(titreController, 'Titre', Icons.title_rounded),
+              const SizedBox(height: 14),
+
+              // ── Champ Extrait ─────────────────────────────────────
+              _buildField(excerptController, 'Extrait / Résumé', Icons.short_text_rounded),
+              const SizedBox(height: 14),
+
+              // ── Champ Contenu ─────────────────────────────────────
               TextField(
-                controller: descCtrl,
-                maxLines: 3,
+                controller: contentController,
+                maxLines: 4,
                 decoration: InputDecoration(
-                  hintText: "Décris ton action citoyenne...",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                ),
-              ),
-              const SizedBox(height: 15),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  if (descCtrl.text.trim().isEmpty || imagePath == null) return;
-
-                  try {
-                    await ApiService.createPost(
-                      token: userToken,
-                      description: descCtrl.text.trim(),
-                      imagePath: imagePath!, title: '',
-                    );
-                    if (!mounted) return;
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Action publiée ✅")),
-                    );
-                  } catch (_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Erreur 😓")),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.send),
-                label: const Text("Publier"),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void showSignalementSheet() {
-    final themes = [
-      "Pollution / Déchets",
-      "Corruption / Détournement",
-      "Violence / Insécurité",
-      "Incivisme routier",
-      "Atteinte aux biens publics",
-      "Harcèlement / Discrimination",
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
-      builder: (_) => ListView.builder(
-        padding: const EdgeInsets.all(20),
-        itemCount: themes.length,
-        itemBuilder: (_, i) => ListTile(
-          title: Text(themes[i]),
-          onTap: () {
-            Navigator.pop(context);
-            showSignalementDetails(themes[i]);
-          },
-        ),
-      ),
-    );
-  }
-
-  void showSignalementDetails(String theme) {
-    final descCtrl = TextEditingController();
-    String? imagePath;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
-      builder: (_) => StatefulBuilder(
-        builder: (_, setModalState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            20,
-            20,
-            MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Signaler : $theme",
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              GestureDetector(
-                onTap: () async {
-                  final img =
-                      await ImagePicker().pickImage(source: ImageSource.gallery);
-                  if (img != null) {
-                    setModalState(() => imagePath = img.path);
-                  }
-                },
-                child: Container(
-                  height: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15),
+                  hintText: "Contenu de l'actualité...",
+                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(bottom: 60),
+                    child: Icon(Icons.article_outlined, color: Color(0xFF1556B5), size: 20),
                   ),
-                  child: imagePath == null
-                      ? const Icon(Icons.add_a_photo,
-                          size: 50, color: Colors.grey)
-                      : Image.file(File(imagePath!), fit: BoxFit.cover),
+                  filled: true,
+                  fillColor: const Color(0xFFF8F9FF),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: Color(0xFF1556B5), width: 1.5),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: descCtrl,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                    hintText: "Décris le signalement"),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  if (descCtrl.text.trim().isEmpty || imagePath == null) return;
+              const SizedBox(height: 24),
 
-                  try {
-                    await ApiService.createSignalement(
-                      token: userToken,
-                      categorie: theme,
-                      description: descCtrl.text.trim(),
-                      imagePath: imagePath!,
-                    );
-                    if (!mounted) return;
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Signalement envoyé ✅")),
-                    );
-                  } catch (_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Erreur 😓")),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.send),
-                label: const Text("Envoyer"),
+              // ── Bouton publier ────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF7F00), Color(0xFF1556B5)],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: _isLoading ? null : () async {
+                      if (titreController.text.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Le titre est obligatoire")),
+                        );
+                        return;
+                      }
+                      setModalState(() => _isLoading = true);
+                      final prefs = await SharedPreferences.getInstance();
+                      final token = prefs.getString("token") ?? "";
+                      if (token.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Token manquant. Connecte-toi d'abord.")),
+                        );
+                        setModalState(() => _isLoading = false);
+                        return;
+                      }
+                      try {
+                        final newPost = await createArticle(
+                          titreController.text,
+                          excerptController.text,
+                          contentController.text,
+                          token,
+                          date: DateTime.now(),
+                        );
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("✅ '${newPost.title}' publié avec succès !"),
+                            backgroundColor: const Color(0xFF34C759),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        );
+                        setState(() {});
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Erreur: \$e"),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        setModalState(() => _isLoading = false);
+                      }
+                    },
+                    child: _isLoading
+                        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text('Publier', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                            ],
+                          ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -327,44 +282,64 @@ class HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[selectedIndex],
+      body: IndexedStack(
+        index: selectedIndex,
+        children: pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: selectedIndex,
+        currentIndex: _navIndex,
         onTap: onItemTapped,
         type: BottomNavigationBarType.fixed,
-        items: [
+        items: const [
           BottomNavigationBarItem(
-              icon: GradientIcon(
-                  icon: Icons.dashboard_rounded,
-                  size: 26,
-                  gradient: mecGradient),
-              label: "Accueil"),
+            icon: Icon(Icons.home_rounded, size: 26, color: Colors.orange),
+            label: "Accueil",
+          ),
           BottomNavigationBarItem(
-              icon: GradientIcon(
-                  icon: Icons.psychology_alt_rounded,
-                  size: 26,
-                  gradient: mecGradient),
-              label: "Quiz"),
+            icon: Icon(Icons.psychology_alt_rounded, size: 26, color: Colors.orange),
+            label: "Quiz",
+          ),
           BottomNavigationBarItem(
-              icon: GradientIcon(
-                  icon: Icons.add_circle_rounded,
-                  size: 30,
-                  gradient: mecGradient),
-              label: "Ajouter"),
+            icon: Icon(Icons.add_circle_rounded, size: 30, color: Colors.orange),
+            label: "Ajouter",
+          ),
           BottomNavigationBarItem(
-              icon: GradientIcon(
-                  icon: Icons.menu_book_rounded,
-                  size: 26,
-                  gradient: mecGradient),
-              label: "Librairie"),
+            icon: Icon(Icons.menu_book_rounded, size: 26, color: Colors.orange),
+            label: "Librairie",
+          ),
           BottomNavigationBarItem(
-              icon: GradientIcon(
-                  icon: Icons.smart_toy_rounded,
-                  size: 26,
-                  gradient: mecGradient),
-              label: "IA"),
+            icon: Icon(Icons.smart_toy_rounded, size: 26, color: Colors.orange),
+            label: "IA",
+          ),
         ],
       ),
     );
   }
+  // ── Helper champ de saisie ───────────────────────────────────────────────
+  Widget _buildField(TextEditingController ctrl, String hint, IconData icon) {
+    return TextField(
+      controller: ctrl,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+        prefixIcon: Icon(icon, color: const Color(0xFF1556B5), size: 20),
+        filled: true,
+        fillColor: const Color(0xFFF8F9FF),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF1556B5), width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+    );
+  }
+
 }

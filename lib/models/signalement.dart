@@ -1,40 +1,73 @@
 class SignalementModel {
-  final int id;
-  final int userId;
+  final String id;
+  final String titre;
   final String description;
-  final String? categorie;
-  final String? imageUrl;
-  final DateTime createdAt;
-  final String statut;
+  final String categorieId;
+  final String? categorieNom; // ✅ ex: "Voirie", extrait de categorie.nom
+  final String adresse;
+  final double latitude;
+  final double longitude;
+  final String? photo;
+  final String? statut;
+  final String citoyenId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   SignalementModel({
     required this.id,
-    required this.userId,
+    required this.titre,
     required this.description,
-    this.categorie,
-    this.imageUrl,
-    required this.createdAt,
-    required this.statut,
+    required this.categorieId,
+    this.categorieNom,
+    required this.adresse,
+    required this.latitude,
+    required this.longitude,
+    this.photo,
+    this.statut,
+    required this.citoyenId,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory SignalementModel.fromJson(Map<String, dynamic> json) {
+    final categorieJson = json['categorie'] as Map<String, dynamic>?;
+
     return SignalementModel(
-      id: json['id'],
-      userId: json['user_id'],
-      description: json['description'],
-      categorie: json['categorie'],
-      imageUrl: json['image'],
-      statut: json['statut'] ?? 'Actif',
-      createdAt: DateTime.parse(json['created_at']),
+      id: json['id'] ?? '',
+      titre: json['titre'] ?? '',
+      description: json['description'] ?? '',
+      categorieId: json['categorieId'] ?? '',
+      categorieNom: categorieJson?['nom'], // ✅ "Voirie"
+      adresse: json['adresse'] ?? '',
+      latitude: (json['latitude'] is String)
+          ? double.parse(json['latitude'])
+          : (json['latitude'] as num).toDouble(),
+      longitude: (json['longitude'] is String)
+          ? double.parse(json['longitude'])
+          : (json['longitude'] as num).toDouble(),
+      photo: json['photo'] != null
+          ? 'https://admin.mec-ci.org${json['photo']}'
+          : null,
+      statut: json['statut'],
+      citoyenId: json['citoyenId'] ?? '',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : null,
     );
   }
 
-  get categoriesignalement => null;
-
   Map<String, dynamic> toJson() {
     return {
+      'titre': titre,
       'description': description,
-      'categorie': categorie,
+      'categorieId': categorieId,
+      'adresse': adresse,
+      'latitude': latitude,
+      'longitude': longitude,
+      if (photo != null) 'photo': photo,
     };
   }
 }

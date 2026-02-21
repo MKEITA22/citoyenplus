@@ -1,64 +1,50 @@
 class PostModel {
-  final int id;
-  final int userId;
+  final String id;
+  final String slug;
   final String title;
-  final String description;
+  final String excerpt;
+  final String content;
   final String? imageUrl;
-  final String? username;
-  final int likes;
-  final int comments;
-  final String tags;
-  final String? type;
-  final DateTime createdAt;
+  final DateTime date;
 
   PostModel({
     required this.id,
-    required this.userId,
+    required this.slug,
     required this.title,
-    required this.description,
+    required this.excerpt,
+    required this.content,
     this.imageUrl,
-    this.username,
-    this.likes = 0,
-    this.comments = 0,
-    this.tags = "Post",
-    this.type,
-    required this.createdAt,
+    required this.date,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
+    final rawImage = json['imageUrl'] as String?;
     return PostModel(
-      id: json['id'] ?? 0,
-      userId: json['user_id'] ?? 0,
+      id: json['id'] ?? '',
+      slug: json['slug'] ?? '',
       title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      imageUrl: json['image'] ?? '',
-      username: json['username'] ?? 'Citoyen',
-      likes: json['likes'] ?? 0,
-      comments: json['comments'] ?? 0,
-      tags: json['tags'] ?? 'Post',
-      type: json['type'],
-      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      excerpt: json['excerpt'] ?? '',
+      content: json['content'] ?? '',
+      imageUrl: (rawImage != null && rawImage.isNotEmpty)
+          ? (rawImage.startsWith('http')
+              ? rawImage
+              : 'https://admin.mec-ci.org$rawImage')
+          : null,
+      date: json['date'] != null
+          ? DateTime.parse(json['date'])
+          : DateTime.now(),
     );
   }
-
-  // Getter pour l'image à utiliser dans PostCard
-  String get imagePath => imageUrl != null && imageUrl!.isNotEmpty
-      ? imageUrl!
-      : 'assets/default.png'; // image par défaut si aucune image
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'user_id': userId,
+      'slug': slug,
       'title': title,
-      'description': description,
-      'image': imageUrl,
-      'username': username,
-      'likes': likes,
-      'comments': comments,
-      'tags': tags,
-      'type': type,
-      'created_at': createdAt.toIso8601String(),
+      'excerpt': excerpt,
+      'content': content,
+      if (imageUrl != null) 'imageUrl': imageUrl,
+      'date': date.toIso8601String(),
     };
   }
 }

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String baseUrl = 'https://mec-ci.org/api/v1';
+  static const String baseUrl = 'https://admin.mec-ci.org/api/v1';
 
   // INSCRIPTION
   static Future<Map<String, dynamic>> signup({
@@ -40,12 +40,22 @@ class AuthService {
         if (data['token'] != null) {
           await saveToken(data['token']);
         }
+
         return {"success": true, "data": data};
       } else {
-        return {
-          "success": false,
-          "message": data["message"] ?? "Erreur lors de l'inscription",
-        };
+        dynamic message = data["message"];
+
+        // Si le message est une liste, on prend le premier élément
+        if (message is List && message.isNotEmpty) {
+          message = message.join("\n");
+        }
+
+        // Si ce n'est pas une String
+        if (message is! String) {
+          message = "Erreur lors de l'inscription";
+        }
+
+        return {"success": false, "message": message};
       }
     } catch (_) {
       return {
@@ -65,16 +75,13 @@ class AuthService {
     try {
       final response = await http.post(
         url,
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: jsonEncode({"email": email, "password": password}),
+        headers: {"Accept": "application/json"},
+        body: {"email": email, "password": password},
       );
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         if (data['token'] != null) {
           await saveToken(data['token']);
         }
@@ -96,9 +103,11 @@ class AuthService {
     await prefs.setString('token', token);
   }
 
-  static Future<String?> getToken() async {
+  static Future<String?> getToken(data) async {
     final prefs = await SharedPreferences.getInstance();
+    
     return prefs.getString('token');
+    
   }
 
   static Future<void> logout() async {
